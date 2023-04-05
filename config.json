@@ -1,0 +1,14 @@
+{
+    "model":              "resnet200d",
+    "seed":               871,
+    "optimizer":          "Adam",
+    "lr":                 1e-4,
+    "NUM_EPOCH":           100,
+    "batch_size":           32,
+    "path":               "/home/ubuntu/e3_result/",
+    "loss":               "FocalLoss",
+    "image_size":         256,
+    "k":                  2,
+    "stratified_grouped": true,
+    "val_perc":           "None"
+}
