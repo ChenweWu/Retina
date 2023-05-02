@@ -23,7 +23,9 @@ import json
 
 RANZCR_CLIP_PATH = "/n/data1/hms/dbmi/rajpurkar/lab/datasets/cxr/RANZCR_CLIP/"
 MIMIC_CXR_PATH = "/n/data1/hms/dbmi/rajpurkar/lab/datasets/cxr/MIMIC-CXR/raw_jpg/"
-RETINAL_PATH = "/home/ubuntu/dp_snow_0_3/"
+# TODO: Modified
+RETINAL_PATH = "/home/van_fanbo/joslin_images_0_1/"
+# RETINAL_PATH = "/home/van_fanbo/joslin_images_0_3/"
 
 class RETINAL(Dataset):
     """
@@ -32,8 +34,9 @@ class RETINAL(Dataset):
     def __init__(self, df_all, transform=None):
      #   df_subset = df_all[df_all["image_id"].isin(df_studyIDs[0])]
         df_subset = df_all
-        self.studyuid = df_subset["image_id"].values
-        self.labels = df_subset['Class'].values
+     # TODO: Modify the image_id?
+        self.studyuid = df_subset["ID"].values
+        self.labels = df_subset['SEX'].values
         self.transform = transform
         
     def __len__(self):
@@ -41,7 +44,7 @@ class RETINAL(Dataset):
     
     def __getitem__(self, idx):
         path = self.studyuid[idx]
-        
+        # TODO: modify the jpg to jepg?
         path = RETINAL_PATH + path+ ".jpg"
       #  print(path)
         image = cv2.imread(path)
@@ -49,6 +52,7 @@ class RETINAL(Dataset):
         image = self.transform(image=image)['image']
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
         image = ToTensorV2()(image = image)["image"]
+        # TODO: Modify?
         labels = self.labels[idx]
         return image, labels
 
@@ -155,7 +159,8 @@ def readData(path):
     # df_train_val = pd.read_csv('train.txt', header=None)
     # print("Done!")
     # return df_all, df_train_val
-    df_all = pd.read_csv('/home/ubuntu/df1_train.csv')
+    # TODO: Modified
+    df_all = pd.read_csv('/home/van_fanbo/data/Retina/df1_train.csv')
     return df_all
 def readTestData(path):
     """Reads RANZCR-CLIP Train and Val data into DataFrames
@@ -175,7 +180,8 @@ def readTestData(path):
     # df_train_val = pd.read_csv('train.txt', header=None)
     # print("Done!")
     # return df_all, df_train_val
-    df_all = pd.read_csv('/home/ubuntu/df1_test.csv')
+    # TODO: modified.
+    df_all = pd.read_csv('/home/van_fanbo/data/Retina/df1_test.csv')
     return df_all
 
 def k_fold_cross_val(df_train_val, df_all, k=3, stratified_grouped=False, val_perc=None):
@@ -333,7 +339,8 @@ def loadTestRetinalData(df_test, df_all, batch_size, image_size):
 def get_transform(image_size, split = 'train'):
     transforms_train = albumentations.Compose([
         albumentations.Resize(image_size, image_size),
-        albumentations.Normalize(mean=[0.48574451207843133, 0.48574451207843133, 0.48574451207843133], std=[0.2284017471372549, 0.2284017471372549, 0.2284017471372549], max_pixel_value=255.0),
+        # TODO: modofied
+        albumentations.Normalize(mean=[0.1408509, 0.08875278, 0.0042098747], std=[0.02660014, 0.02066635, 0.00076592044], max_pixel_value=255.0),
         albumentations.HorizontalFlip(p=0.5),
         albumentations.RandomBrightnessContrast(p=0.75),
 
@@ -348,7 +355,8 @@ def get_transform(image_size, split = 'train'):
     ])
     transforms_val = albumentations.Compose([
         albumentations.Resize(image_size, image_size),
-        albumentations.Normalize(mean=[0.48574451207843133, 0.48574451207843133, 0.48574451207843133], std=[0.2284017471372549, 0.2284017471372549, 0.2284017471372549], max_pixel_value=255.0)
+        # TODO: modofied
+        albumentations.Normalize(mean=[0.14061858, 0.08827546, 0.0042053442], std=[0.026519237, 0.020728134, 0.000766923], max_pixel_value=255.0)
     ])
     if split == 'train':
         return transforms_train

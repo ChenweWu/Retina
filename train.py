@@ -140,7 +140,7 @@ def main(config):
         torch.save(state, config['path'] +config['model']+' epoch '+str(epoch)+"f1 {}".format(f1)+"full wd")
         # torch.save(model.state_dict(), config['model']+"k_" + str(curr_fold) + ".pth")
         print("saved...")
-        with open("/home/ubuntu/e3.txt", 'a') as f:
+        with open("/home/van_fanbo/e3.txt", 'a') as f:
             f.write("")
             f.write(f"epoch {epoch}, f1 score: {f1}")
             f.write(np.array2string(confusion_matrix(y_list, pred_list), separator=', '))

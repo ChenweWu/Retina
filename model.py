@@ -60,7 +60,8 @@ class ResNet200D(nn.Module):
         self.model.global_pool = nn.Identity()
         self.model.fc = nn.Identity()
         self.pooling = nn.AdaptiveAvgPool2d(1)
-        self.fc = nn.Linear(n_features, 3)
+        # TODO: Modified 3 to 2
+        self.fc = nn.Linear(n_features, 2)
 
     def forward(self, x):
         bs = x.size(0)
