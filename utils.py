@@ -24,8 +24,8 @@ import json
 RANZCR_CLIP_PATH = "/n/data1/hms/dbmi/rajpurkar/lab/datasets/cxr/RANZCR_CLIP/"
 MIMIC_CXR_PATH = "/n/data1/hms/dbmi/rajpurkar/lab/datasets/cxr/MIMIC-CXR/raw_jpg/"
 # TODO: Modified
-RETINAL_PATH = "/home/van_fanbo/joslin_images_0_1/"
-# RETINAL_PATH = "/home/van_fanbo/joslin_images_0_3/"
+RETINAL_PATH = "/home/van_fanbo/data/joslin_images_0_1/"
+# RETINAL_PATH = "/home/van_fanbo/data/joslin_images_0_3/"
 
 class RETINAL(Dataset):
     """
@@ -160,7 +160,7 @@ def readData(path):
     # print("Done!")
     # return df_all, df_train_val
     # TODO: Modified
-    df_all = pd.read_csv('/home/van_fanbo/data/Retina/df1_train.csv')
+    df_all = pd.read_csv('/home/van_fanbo/df1_train.csv')
     return df_all
 def readTestData(path):
     """Reads RANZCR-CLIP Train and Val data into DataFrames
@@ -181,7 +181,7 @@ def readTestData(path):
     # print("Done!")
     # return df_all, df_train_val
     # TODO: modified.
-    df_all = pd.read_csv('/home/van_fanbo/data/Retina/df1_test.csv')
+    df_all = pd.read_csv('/home/van_fanbo/df1_test.csv')
     return df_all
 
 def k_fold_cross_val(df_train_val, df_all, k=3, stratified_grouped=False, val_perc=None):
