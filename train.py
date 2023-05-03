@@ -34,7 +34,7 @@ def main(config):
     
     # for curr_fold in range(len(folds)):
     #     print('Training on Fold ' + str(curr_fold + 1) + ' of ' + str(len(folds)))
-    train_loader = loadRetinalData2( df_all, config['batch_size'], config['image_size'], config['retinal_path'], config['channel_avg'], config['channel_std'], split='train')
+    train_loader = loadRetinalData2( df_all, config['batch_size'], config['image_size'], config['retinal_path'], config['class_column'], config['channel_avg'], config['channel_std'], split='train')
     val_loader = loadRetinalData2( df_val, 1, config['image_size'], config['retinal_path'], config['channel_avg'], config['channel_std'], split='val')
     # Model
     if config['model'] == 'resnet50':
@@ -42,7 +42,7 @@ def main(config):
     elif config['model'] == 'resnet50_binary':
         model = resnet50_binary()
     elif config['model'] == 'resnet200d':
-        model = ResNet200D()
+        model = ResNet200D(config['n_classes'])
     elif config['model'] == 'densenet121':
         model = densenet121()
     elif config['model'] == 'EfficientNetB5':

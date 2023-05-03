@@ -53,14 +53,14 @@ def densenet121(pretrained=True, n_classes = 11):
 #     return model
 
 class ResNet200D(nn.Module):
-    def __init__(self, model_name='resnet200d'):
+    def __init__(self, n_classes, model_name='resnet200d'):
         super().__init__()
         self.model = timm.create_model(model_name, pretrained=True)
         n_features = self.model.fc.in_features
         self.model.global_pool = nn.Identity()
         self.model.fc = nn.Identity()
         self.pooling = nn.AdaptiveAvgPool2d(1)
-        self.fc = nn.Linear(n_features, 3)
+        self.fc = nn.Linear(n_features, n_classes)
 
     def forward(self, x):
         bs = x.size(0)
