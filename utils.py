@@ -330,8 +330,10 @@ def loadTestRetinalData(df_test, df_all, batch_size, image_size):
 
 
 # Transform
+
 def get_transform(image_size, split = 'train'):
     transforms_train = albumentations.Compose([
+        albumentations.Crop(x_min=500, y_min=1000, x_max=3500, y_max=3000, always_apply=True),
         albumentations.Resize(image_size, image_size),
         albumentations.Normalize(mean=[0.48574451207843133, 0.48574451207843133, 0.48574451207843133], std=[0.2284017471372549, 0.2284017471372549, 0.2284017471372549], max_pixel_value=255.0),
         albumentations.HorizontalFlip(p=0.5),
@@ -347,6 +349,7 @@ def get_transform(image_size, split = 'train'):
      #   CutoutV2(max_h_size=int(image_size * 0.4), max_w_size=int(image_size * 0.4), num_holes=1, p=0.75),
     ])
     transforms_val = albumentations.Compose([
+        albumentations.Crop(x_min=500, y_min=1000, x_max=3500, y_max=3000, always_apply=True),
         albumentations.Resize(image_size, image_size),
         albumentations.Normalize(mean=[0.48574451207843133, 0.48574451207843133, 0.48574451207843133], std=[0.2284017471372549, 0.2284017471372549, 0.2284017471372549], max_pixel_value=255.0)
     ])
