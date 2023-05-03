@@ -21,28 +21,28 @@ def main(config):
         description of thing to return
     """
     # DEVICE
-    DEVICE = torch.device("cuda:1")
+    DEVICE = config['device']
 
      # Seed
     seed_everything(config['seed'])
     
     # Load data
-    df_all = readData(config['path'])
-    df_val = readTestData(config['path'])
+    df_all = readData(config['train_path'])
+    df_val = readTestData(config['test_path'])
     # val_perc = None if config['val_perc']=="None" else config['val_perc']
     # folds = k_fold_cross_val(df_train_val, df_all, k=config['k'], stratified_grouped = config['stratified_grouped'], val_perc=val_perc)
     
     # for curr_fold in range(len(folds)):
     #     print('Training on Fold ' + str(curr_fold + 1) + ' of ' + str(len(folds)))
-    train_loader = loadRetinalData2( df_all, config['batch_size'], config['image_size'])
-    val_loader = loadRetinalData2( df_val, 1, config['image_size'])
+    train_loader = loadRetinalData2( df_all, config['batch_size'], config['image_size'], config['retinal_path'], config['class_column'], config['channel_avg'], config['channel_std'], config['crop_dims'], split='train', num_workers=config['num_loader_workers'])
+    val_loader = loadRetinalData2( df_val, 1, config['image_size'], config['retinal_path'], config['class_column'], config['channel_avg'], config['channel_std'], config['crop_dims'], split='val', num_workers=config['num_loader_workers'])
     # Model
     if config['model'] == 'resnet50':
         model = resnet50()
     elif config['model'] == 'resnet50_binary':
         model = resnet50_binary()
     elif config['model'] == 'resnet200d':
-        model = ResNet200D()
+        model = ResNet200D(config['n_classes'])
     elif config['model'] == 'densenet121':
         model = densenet121()
     elif config['model'] == 'EfficientNetB5':
@@ -55,7 +55,7 @@ def main(config):
     
     model = model.to(DEVICE)
     # Loss Fc
-    class_dis = np.array([1410,66,36])
+    class_dis = np.array(config['class_dist'])
     class_weights =1-class_dis/np.sum(class_dis)
     print(class_weights)
     criterion = get_lossfn(config['loss'],torch.tensor(class_weights).float().to(DEVICE))
@@ -137,10 +137,11 @@ def main(config):
         print("f1 score: ", f1)
 
         state = {'model': model.state_dict(), 'optimizer': optimizer.state_dict(), 'epoch': epoch}
-        torch.save(state, config['path'] +config['model']+' epoch '+str(epoch)+"f1 {}".format(f1)+"full wd")
-        # torch.save(model.state_dict(), config['model']+"k_" + str(curr_fold) + ".pth")
-        print("saved...")
-        with open("/home/ubuntu/e3.txt", 'a') as f:
+        if (epoch+1) % config['chkpt_step'] == 0:
+            torch.save(state, config['path'] +config['model']+' epoch '+str(epoch)+"f1 {}".format(f1)+"full wd")
+            # torch.save(model.state_dict(), config['model']+"k_" + str(curr_fold) + ".pth")
+            print("saved...")
+        with open(config['path']+"metrics.txt", 'a') as f:
             f.write("")
             f.write(f"epoch {epoch}, f1 score: {f1}")
             f.write(np.array2string(confusion_matrix(y_list, pred_list), separator=', '))
