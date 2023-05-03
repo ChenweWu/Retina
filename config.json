@@ -16,6 +16,7 @@
     "image_size":         256,
     "channel_avg":       [92.123713, 57.337554, 0.419867],
     "channel_std":       [19.201699, 14.765197, 0.044243],
+    "crop_dims":         [500, 1000, 3500, 3000],
     "class_column":      "final_label",
     "n_classes":         3,
     "class_dist":        [12161, 2140, 1078],

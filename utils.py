@@ -301,7 +301,7 @@ def loadRetinalData(fold, df_all, batch_size, image_size):
     return train_loader, valid_loader 
 
 
-def loadRetinalData2(df_all, batch_size, image_size, retinal_path, class_column, channel_avg, channel_std, split='train', num_workers=0):
+def loadRetinalData2(df_all, batch_size, image_size, retinal_path, class_column, channel_avg, channel_std, crop_dims, split='train', num_workers=0):
     """Creates train and val loaders
 
     Parameters
@@ -323,7 +323,7 @@ def loadRetinalData2(df_all, batch_size, image_size, retinal_path, class_column,
         loader for validation set
 
     """
-    train_dataset = RETINAL(df_all, retinal_path, class_column, transform=get_transform(image_size, channel_avg, channel_std, split=split))
+    train_dataset = RETINAL(df_all, retinal_path, class_column, transform=get_transform(image_size, channel_avg, channel_std, crop_dims, split=split))
     train_loader = DataLoader(train_dataset, batch_size = batch_size , shuffle = True, num_workers=num_workers)    
     # valid_dataset = RETINAL(df_all, fold[1], transform=get_transform(image_size, 'val'))
     # valid_loader = DataLoader(valid_dataset, batch_size = batch_size, shuffle = False)
@@ -338,9 +338,9 @@ def loadTestRetinalData(df_test, df_all, batch_size, image_size):
 
 # Transform
 
-def get_transform(image_size, channel_avg, channel_std, split = 'train'):
+def get_transform(image_size, channel_avg, channel_std, crop_dims, split = 'train'):
     transforms_train = albumentations.Compose([
-        albumentations.Crop(x_min=500, y_min=1000, x_max=3500, y_max=3000, always_apply=True),
+        albumentations.Crop(x_min=crop_dims[0], y_min=crop_dims[1], x_max=crop_dims[2], y_max=crop_dims[3], always_apply=True),
         albumentations.Resize(image_size, image_size),
         albumentations.Normalize(mean=channel_avg, std=channel_std, max_pixel_value=255.0),
         albumentations.HorizontalFlip(p=0.5),
@@ -356,7 +356,7 @@ def get_transform(image_size, channel_avg, channel_std, split = 'train'):
      #   CutoutV2(max_h_size=int(image_size * 0.4), max_w_size=int(image_size * 0.4), num_holes=1, p=0.75),
     ])
     transforms_val = albumentations.Compose([
-        albumentations.Crop(x_min=500, y_min=1000, x_max=3500, y_max=3000, always_apply=True),
+        albumentations.Crop(x_min=crop_dims[0], y_min=crop_dims[1], x_max=crop_dims[2], y_max=crop_dims[3], always_apply=True),
         albumentations.Resize(image_size, image_size),
         albumentations.Normalize(mean=channel_avg, std=channel_std, max_pixel_value=255.0),
     ])
