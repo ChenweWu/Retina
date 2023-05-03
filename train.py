@@ -21,7 +21,7 @@ def main(config):
         description of thing to return
     """
     # DEVICE
-    DEVICE = torch.device("cuda:1")
+    DEVICE = config['device']
 
      # Seed
     seed_everything(config['seed'])
@@ -34,8 +34,8 @@ def main(config):
     
     # for curr_fold in range(len(folds)):
     #     print('Training on Fold ' + str(curr_fold + 1) + ' of ' + str(len(folds)))
-    train_loader = loadRetinalData2( df_all, config['batch_size'], config['image_size'], config['retinal_path'], config['class_column'], config['channel_avg'], config['channel_std'], split='train')
-    val_loader = loadRetinalData2( df_val, 1, config['image_size'], config['retinal_path'], config['channel_avg'], config['channel_std'], split='val')
+    train_loader = loadRetinalData2( df_all, config['batch_size'], config['image_size'], config['retinal_path'], config['class_column'], config['channel_avg'], config['channel_std'], split='train', num_workers=config['num_loader_workers'])
+    val_loader = loadRetinalData2( df_val, 1, config['image_size'], config['retinal_path'], config['class_column'], config['channel_avg'], config['channel_std'], split='val', num_workers=config['num_loader_workers'])
     # Model
     if config['model'] == 'resnet50':
         model = resnet50()

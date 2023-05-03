@@ -32,7 +32,7 @@ class RETINAL(Dataset):
     def __init__(self, df_all, retinal_path, class_column, transform=None):
      #   df_subset = df_all[df_all["image_id"].isin(df_studyIDs[0])]
         df_subset = df_all
-        self.studyuid = df_subset["ID"].values
+        self.studyuid = df_subset["ID"].astype(str).values
         if isinstance(type(df_subset[class_column][0]), str):
             self.labels = df_subset[class_column].astype('category').cat.codes.values
         else:
@@ -47,7 +47,7 @@ class RETINAL(Dataset):
         path = self.studyuid[idx]
         
         # path = RETINAL_PATH + path+ ".jpg"
-        path = os.path.join(self.retinal_path, path+'.jpg')
+        path = os.path.join(self.retinal_path, path+'.jpeg')
       #  print(path)
         image = cv2.imread(path)
        # print(image)
@@ -301,7 +301,7 @@ def loadRetinalData(fold, df_all, batch_size, image_size):
     return train_loader, valid_loader 
 
 
-def loadRetinalData2(df_all, batch_size, image_size, retinal_path, class_column, channel_avg, channel_std, split='train'):
+def loadRetinalData2(df_all, batch_size, image_size, retinal_path, class_column, channel_avg, channel_std, split='train', num_workers=0):
     """Creates train and val loaders
 
     Parameters
@@ -324,7 +324,7 @@ def loadRetinalData2(df_all, batch_size, image_size, retinal_path, class_column,
 
     """
     train_dataset = RETINAL(df_all, retinal_path, class_column, transform=get_transform(image_size, channel_avg, channel_std, split=split))
-    train_loader = DataLoader(train_dataset, retinal_path, batch_size = batch_size , shuffle = True)    
+    train_loader = DataLoader(train_dataset, batch_size = batch_size , shuffle = True, num_workers=num_workers)    
     # valid_dataset = RETINAL(df_all, fold[1], transform=get_transform(image_size, 'val'))
     # valid_loader = DataLoader(valid_dataset, batch_size = batch_size, shuffle = False)
     return train_loader
