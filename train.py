@@ -27,15 +27,15 @@ def main(config):
     seed_everything(config['seed'])
     
     # Load data
-    df_all = readData(config['path'])
-    df_val = readTestData(config['path'])
+    df_all = readData(config['train_path'])
+    df_val = readTestData(config['test_path'])
     # val_perc = None if config['val_perc']=="None" else config['val_perc']
     # folds = k_fold_cross_val(df_train_val, df_all, k=config['k'], stratified_grouped = config['stratified_grouped'], val_perc=val_perc)
     
     # for curr_fold in range(len(folds)):
     #     print('Training on Fold ' + str(curr_fold + 1) + ' of ' + str(len(folds)))
-    train_loader = loadRetinalData2( df_all, config['batch_size'], config['image_size'])
-    val_loader = loadRetinalData2( df_val, 1, config['image_size'])
+    train_loader = loadRetinalData2( df_all, config['batch_size'], config['image_size'], config['retinal_path'], config['channel_avg'], config['channel_std'], split='train')
+    val_loader = loadRetinalData2( df_val, 1, config['image_size'], config['retinal_path'], config['channel_avg'], config['channel_std'], split='val')
     # Model
     if config['model'] == 'resnet50':
         model = resnet50()
@@ -55,7 +55,7 @@ def main(config):
     
     model = model.to(DEVICE)
     # Loss Fc
-    class_dis = np.array([1410,66,36])
+    class_dis = np.array(config['class_dist'])
     class_weights =1-class_dis/np.sum(class_dis)
     print(class_weights)
     criterion = get_lossfn(config['loss'],torch.tensor(class_weights).float().to(DEVICE))
