@@ -33,7 +33,7 @@ class RETINAL(Dataset):
      #   df_subset = df_all[df_all["image_id"].isin(df_studyIDs[0])]
         df_subset = df_all
         self.studyuid = df_subset["ID"].astype(str).values
-        if isinstance(type(df_subset[class_column][0]), str):
+        if isinstance(df_subset[class_column][0], str):
             self.labels = df_subset[class_column].astype('category').cat.codes.values
         else:
             self.labels = df_subset[class_column].values
