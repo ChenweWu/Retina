@@ -31,21 +31,23 @@ class RETINAL(Dataset):
     """
     Brazilian Retinal Image Dataset Class
     """
+
     def __init__(self, df_all, transform=None):
      #   df_subset = df_all[df_all["image_id"].isin(df_studyIDs[0])]
         df_subset = df_all
      # TODO: Modify the image_id?
-        self.studyuid = df_subset["ID"].values
+        self.studyuid = df_subset["ID_str"].values
         self.labels = df_subset['SEX'].values
         self.transform = transform
+        self.label_map = {'F': 0, 'M': 1}
         
     def __len__(self):
         return self.studyuid.shape[0]
     
     def __getitem__(self, idx):
         path = self.studyuid[idx]
-        # TODO: modify the jpg to jepg?
-        path = RETINAL_PATH + path+ ".jpg"
+        # TODO: modify the jpg to jpeg?
+        path = RETINAL_PATH + str(path) + ".jpeg"
       #  print(path)
         image = cv2.imread(path)
        # print(image)
@@ -53,7 +55,7 @@ class RETINAL(Dataset):
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
         image = ToTensorV2()(image = image)["image"]
         # TODO: Modify?
-        labels = self.labels[idx]
+        labels = self.label_map[self.labels[idx]]
         return image, labels
 
 
@@ -82,7 +84,7 @@ class RANZCR_CLIP(Dataset):
     
     def __getitem__(self, idx):
         path = self.studyuid[idx]
-        path = RANZCR_CLIP_PATH + "train/" + path + ".jpg"
+        path = RANZCR_CLIP_PATH + "train/" + path + ".jpeg"
         image = cv2.imread(path)
         image = self.transform(image=image)['image']
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
@@ -109,7 +111,7 @@ class MIMIC_CXR(Dataset):
         return len(self.path)
     
     def __getitem__(self, idx):
-        img_path = os.path.join(MIMIC_CXR_PATH, self.path[idx]).replace('dcm', 'jpg')
+        img_path = os.path.join(MIMIC_CXR_PATH, self.path[idx]).replace('dcm', 'jpeg')
         image = cv2.imread(img_path)
         image = self.transform(image=image)['image']
         image = ToTensorV2()(image = image)["image"]
@@ -256,9 +258,9 @@ def loadData(fold, df_all, batch_size, image_size):
 
     """
     train_dataset = RANZCR_CLIP(df_all, fold[0], transform=get_transform(image_size, 'train'))
-    train_loader = DataLoader(train_dataset, batch_size = batch_size , shuffle = True)    
+    train_loader = DataLoader(train_dataset, batch_size = batch_size , shuffle = True, num_workers=4)
     valid_dataset = RANZCR_CLIP(df_all, fold[1], transform=get_transform(image_size, 'val'))
-    valid_loader = DataLoader(valid_dataset, batch_size = batch_size, shuffle = False)
+    valid_loader = DataLoader(valid_dataset, batch_size = batch_size, shuffle = False, num_workers=4)
     return train_loader, valid_loader  
 
 def loadTestData(df_test, df_all, batch_size, image_size):
@@ -323,7 +325,7 @@ def loadRetinalData2(df_all, batch_size, image_size):
 
     """
     train_dataset = RETINAL(df_all, transform=get_transform(image_size, 'val'))
-    train_loader = DataLoader(train_dataset, batch_size = batch_size , shuffle = True)    
+    train_loader = DataLoader(train_dataset, batch_size = batch_size , shuffle = True, num_workers=4)
     # valid_dataset = RETINAL(df_all, fold[1], transform=get_transform(image_size, 'val'))
     # valid_loader = DataLoader(valid_dataset, batch_size = batch_size, shuffle = False)
     return train_loader
@@ -411,7 +413,7 @@ class FocalLoss(nn.Module):
             input = input.contiguous().view(-1,input.size(2))   # N,H*W,C => N*H*W,C
         target = target.view(-1,1)
 
-        logpt = F.log_softmax(input)
+        logpt = F.log_softmax(input, dim=1)
         logpt = logpt.gather(1,target)
         logpt = logpt.view(-1)
         pt = Variable(logpt.data.exp())

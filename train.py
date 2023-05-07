@@ -21,7 +21,7 @@ def main(config):
         description of thing to return
     """
     # DEVICE
-    DEVICE = torch.device("cuda:1")
+    DEVICE = torch.device("cuda:0")
 
      # Seed
     seed_everything(config['seed'])
@@ -133,7 +133,6 @@ def main(config):
         print(confusion_matrix(y_list, pred_list))
         print(accuracy_score(y_list, pred_list))
         f1 = f1_score(y_list, pred_list, average='macro')
-        print("f1 score: ", f1)
         print("f1 score: ", f1)
 
         state = {'model': model.state_dict(), 'optimizer': optimizer.state_dict(), 'epoch': epoch}
