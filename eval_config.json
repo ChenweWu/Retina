@@ -1,0 +1,17 @@
+{
+    "device":		      "cuda:0",
+    "model":              "resnet200d",
+    "my_model":           "gender_classifier_19_88766",
+    "num_loader_workers": 7,
+    "retinal_path":       "/home/van_fanbo/",
+    "test_folder":        "vs_05",
+    "test_path":          "df1_test.csv",
+    "path":               "/home/van_fanbo/output/",
+    "image_size":         256,
+    "channel_avg":       [92.123713, 57.337554, 0.419867],
+    "channel_std":       [19.201699, 14.765197, 0.044243],
+    "crop_dims":         [64, 128, 448, 384],
+    "class_column":      "SEX",
+    "NUM_EPOCH":          20,
+    "n_classes":         2
+}

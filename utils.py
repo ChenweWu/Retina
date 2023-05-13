@@ -32,14 +32,18 @@ class RETINAL(Dataset):
     Brazilian Retinal Image Dataset Class
     """
 
-    def __init__(self, df_all, transform=None):
+    def __init__(self, df_all, retinal_path, class_column, transform=None):
      #   df_subset = df_all[df_all["image_id"].isin(df_studyIDs[0])]
         df_subset = df_all
      # TODO: Modify the image_id?
-        self.studyuid = df_subset["ID_str"].values
-        self.labels = df_subset['SEX'].values
+        self.studyuid = df_subset["ID"].astype(str).values
+        if isinstance(type(df_subset[class_column][0]), str):
+            self.labels = df_subset[class_column].astype('category').cat.codes.values
+        else:
+            self.labels = df_subset[class_column].values
         self.transform = transform
         self.label_map = {'F': 0, 'M': 1}
+        self.retinal_path = retinal_path
         
     def __len__(self):
         return self.studyuid.shape[0]
@@ -47,7 +51,7 @@ class RETINAL(Dataset):
     def __getitem__(self, idx):
         path = self.studyuid[idx]
         # TODO: modify the jpg to jpeg?
-        path = RETINAL_PATH + str(path) + ".jpeg"
+        path = os.path.join(self.retinal_path, path+'.jpeg')
       #  print(path)
         image = cv2.imread(path)
        # print(image)
@@ -162,7 +166,8 @@ def readData(path):
     # print("Done!")
     # return df_all, df_train_val
     # TODO: Modified
-    df_all = pd.read_csv('/home/van_fanbo/df1_train.csv')
+    # df_all = pd.read_csv('/home/van_fanbo/df1_train.csv')
+    df_all = pd.read_csv(path)
     return df_all
 def readTestData(path):
     """Reads RANZCR-CLIP Train and Val data into DataFrames
@@ -183,7 +188,8 @@ def readTestData(path):
     # print("Done!")
     # return df_all, df_train_val
     # TODO: modified.
-    df_all = pd.read_csv('/home/van_fanbo/df1_test.csv')
+    # df_all = pd.read_csv('/home/van_fanbo/df1_test.csv')
+    df_all = pd.read_csv(path)
     return df_all
 
 def k_fold_cross_val(df_train_val, df_all, k=3, stratified_grouped=False, val_perc=None):
@@ -302,7 +308,7 @@ def loadRetinalData(fold, df_all, batch_size, image_size):
     return train_loader, valid_loader 
 
 
-def loadRetinalData2(df_all, batch_size, image_size):
+def loadRetinalData2(df_all, batch_size, image_size, retinal_path, class_column, channel_avg, channel_std, crop_dims, split='train', num_workers=0):
     """Creates train and val loaders
 
     Parameters
@@ -324,8 +330,8 @@ def loadRetinalData2(df_all, batch_size, image_size):
         loader for validation set
 
     """
-    train_dataset = RETINAL(df_all, transform=get_transform(image_size, 'val'))
-    train_loader = DataLoader(train_dataset, batch_size = batch_size , shuffle = True, num_workers=4)
+    train_dataset = RETINAL(df_all, retinal_path, class_column, transform=get_transform(image_size, channel_avg, channel_std, crop_dims, split=split))
+    train_loader = DataLoader(train_dataset, batch_size = batch_size , shuffle = True, num_workers=num_workers)
     # valid_dataset = RETINAL(df_all, fold[1], transform=get_transform(image_size, 'val'))
     # valid_loader = DataLoader(valid_dataset, batch_size = batch_size, shuffle = False)
     return train_loader
@@ -338,11 +344,13 @@ def loadTestRetinalData(df_test, df_all, batch_size, image_size):
 
 
 # Transform
-def get_transform(image_size, split = 'train'):
+def get_transform(image_size, channel_avg, channel_std, crop_dims, split = 'train'):
     transforms_train = albumentations.Compose([
+        # albumentations.Crop(x_min=crop_dims[0], y_min=crop_dims[1], x_max=crop_dims[2], y_max=crop_dims[3],
+        #                     always_apply=True),
         albumentations.Resize(image_size, image_size),
         # TODO: modofied
-        albumentations.Normalize(mean=[0.1408509, 0.08875278, 0.0042098747], std=[0.02660014, 0.02066635, 0.00076592044], max_pixel_value=255.0),
+        albumentations.Normalize(mean=channel_avg, std=channel_std, max_pixel_value=255.0),
         albumentations.HorizontalFlip(p=0.5),
         albumentations.RandomBrightnessContrast(p=0.75),
 
@@ -356,9 +364,11 @@ def get_transform(image_size, split = 'train'):
      #   CutoutV2(max_h_size=int(image_size * 0.4), max_w_size=int(image_size * 0.4), num_holes=1, p=0.75),
     ])
     transforms_val = albumentations.Compose([
+        # albumentations.Crop(x_min=crop_dims[0], y_min=crop_dims[1], x_max=crop_dims[2], y_max=crop_dims[3],
+        #                     always_apply=True),
         albumentations.Resize(image_size, image_size),
         # TODO: modofied
-        albumentations.Normalize(mean=[0.14061858, 0.08827546, 0.0042053442], std=[0.026519237, 0.020728134, 0.000766923], max_pixel_value=255.0)
+        albumentations.Normalize(mean=channel_avg, std=channel_std, max_pixel_value=255.0),
     ])
     if split == 'train':
         return transforms_train
